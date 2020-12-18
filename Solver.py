@@ -30,14 +30,18 @@ def isSafe(board, row, col, num):
 def findUnassigned(board):
     for row in range(len(board)):
         for col in range(len(board[0])):
-            if(board[row][col] == 0)
+            if board[row][col] == 0:
                 return (row,col)
-    return(-1,-1)
+    return None
 
 
 def solveSudoku(board):
     # Finds the first unassigned cell in the board
-    row, col = findUnassigned(board)
+    find = findUnassigned(board)
+    if not find:
+        return True
+    else:
+        row,col = find
 
     # The entire sudoku is filled
     if row==-1 and col==-1:
@@ -59,19 +63,21 @@ def solveSudoku(board):
     return False
 
 
-board = [[]
-         []
-         []
-         []
-         []
-         []
-         []
-         []
-         []]
+board = [[9,8,0,6,0,0,0,3,1],
+         [0,0,7,0,0,0,0,0,0],
+         [6,0,0,5,4,0,0,0,0],
+         [0,0,0,0,0,8,3,7,4],
+         [0,0,0,0,6,0,0,0,0],
+         [0,0,0,0,0,0,9,0,2],
+         [0,3,2,0,0,7,4,0,0],
+         [0,4,0,3,0,0,0,1,0],
+         [0,0,0,0,0,0,0,0,0]]
 
-solved_board = [int(x) for line in board for x in line]
+solved_board = [[int(x) for x in line] for line in board]
+# print(solved_board)
 
 if solveSudoku(solved_board):
-    print(solved_board)
+    for line in solved_board:
+        print(line)
 else:
     print("This Sudoku cannot be solved!")
