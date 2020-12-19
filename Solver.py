@@ -75,9 +75,3 @@ board = [[9,8,0,6,0,0,0,3,1],
 
 solved_board = [[int(x) for x in line] for line in board]
 # print(solved_board)
-
-if solveSudoku(solved_board):
-    for line in solved_board:
-        print(line)
-else:
-    print("This Sudoku cannot be solved!")

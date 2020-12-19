@@ -6,21 +6,30 @@ import time
 # Constants
 WHITE = (255,255,255)
 BLACK = (0,0,0)
-WIDTH, HEIGHT = 540, 600
+GREY = (112, 127, 128)
+WIDTH, HEIGHT = 542, 600
 
 
 # Setting up the display
 pygame.init()
 win = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Sudoku")
-FPS = 30
-clock = pygame.time.clock()
+FPS = 60
+clock = pygame.time.Clock()
 
 
 # Fonts
+class Fonts:
+    def __init__(self, height):
+        self.height = height
+        self.footerFont()
 
-
-
+    def footerFont(self):
+        self.footer_size = int(round(HEIGHT - self.height)/2)
+        self.footer_gap =  int(round(HEIGHT - self.height)/4)
+        print(self.footer_size )
+        self.footer_font = pygame.font.SysFont('comicsans',self.footer_size)
+        self.footer_ypos = int(round(self.height + 1.3*self.footer_gap))
 
 # Data
 #  Cubes, Width, Height, model to check with solution Array, selected row and column, notes
@@ -43,10 +52,33 @@ class Grid:
              [0,4,0,3,0,0,0,1,0],
              [0,0,0,0,0,0,0,0,0]]
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, offset):
         self.height = height
         self.width = width
-        self.cubes = [[cube(board[i][j],j,i) for j in range(cols)] for i in range(rows)]
+        self.cubes = [[Cube(self.board[i][j],j,i) for j in range(9)] for i in range(9)]
+        self.offset = offset
+        self.notes = False
+
+    def updateModel(self):
+        self.model = [[cube.value for cube in line] for line in self.cubes]
+
+    def draw(self, win):
+        win.fill(WHITE)
+        gap = (self.height - 2*self.offset)/ 9
+
+        for i in range(10):
+            thickness = 1
+            color = GREY
+            if i%3 == 0:
+                color = BLACK
+                thickness = 2
+            pygame.draw.line(win, color, (self.offset + 0, gap*i), (self.offset+ self.height, gap*i), thickness)
+            pygame.draw.line(win, color, (self.offset + gap*i, 0), (self.offset + gap*i, self.width), thickness)
+
+        pygame.display.update()
+
+
+
 
 
 # Data
@@ -65,17 +97,46 @@ class Cube:
 
 
 # Draw Time, Mistakes and Notes on and oFF
-def drawLeftovers():
+def drawLeftovers(win, fonts, play_time):
+    time = formatTime(play_time)
+
+    # Time
+    text = fonts.footer_font.render("Time: " + time, 1, BLACK)
+    win.blit(text, (WIDTH-text.get_width()-15,fonts.footer_ypos))
+    pygame.display.update()
 
 
+def formatTime(secs):
+    sec = int(secs)%60
+    minute = int((secs//60)%60)
+    hour = int(secs//(60*60))
+
+    time  = " " + str(minute) + ":" +  str(sec)
+    return time
 
 def main():
-    clock.tick()
+
     start = time.time()
-    board = Grid(540,540)
+    board = Grid(540,540,0)
+    fonts = Fonts(540)
     key = None
     run = True
     mistakes = 0
 
     while run:
-        
+        clock.tick(FPS)
+        play_time = time.time() - start
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+
+        board.draw(win)
+        drawLeftovers(win, fonts, play_time)
+
+    return start
+
+
+
+main()
+pygame.quit()
