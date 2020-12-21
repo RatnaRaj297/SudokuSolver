@@ -7,6 +7,8 @@ import time
 WHITE = (255,255,255)
 BLACK = (0,0,0)
 GREY = (112, 127, 128)
+RED = (255,0,0)
+BLUE = (74,144,226)
 WIDTH, HEIGHT = 542, 600
 
 
@@ -23,13 +25,20 @@ class Fonts:
     def __init__(self, height):
         self.height = height
         self.footerFont()
+        # self.pencilFont()
+        self.cubeFont()
 
     def footerFont(self):
         self.footer_size = int(round(HEIGHT - self.height)/2)
         self.footer_gap =  int(round(HEIGHT - self.height)/4)
-        print(self.footer_size )
         self.footer_font = pygame.font.SysFont('comicsans',self.footer_size)
         self.footer_ypos = int(round(self.height + 1.3*self.footer_gap))
+
+    # def pencilFont(self):
+
+    def cubeFont(self):
+        self.cube_size = round(self.height/15)
+        self.cube_font = pygame.font.SysFont('comicsans',self.cube_size)
 
 # Data
 #  Cubes, Width, Height, model to check with solution Array, selected row and column, notes
@@ -58,22 +67,61 @@ class Grid:
         self.cubes = [[Cube(self.board[i][j],j,i) for j in range(9)] for i in range(9)]
         self.offset = offset
         self.notes = False
+        self.gap = (self.height - 2*self.offset)/ 9
 
     def updateModel(self):
         self.model = [[cube.value for cube in line] for line in self.cubes]
 
-    def draw(self, win):
+    def draw(self, win, fonts, play_time):
         win.fill(WHITE)
-        gap = (self.height - 2*self.offset)/ 9
 
+        # Gridlines
         for i in range(10):
             thickness = 1
             color = GREY
             if i%3 == 0:
                 color = BLACK
                 thickness = 2
-            pygame.draw.line(win, color, (self.offset + 0, gap*i), (self.offset+ self.height, gap*i), thickness)
-            pygame.draw.line(win, color, (self.offset + gap*i, 0), (self.offset + gap*i, self.width), thickness)
+            pygame.draw.line(win, color, (self.offset + 0, self.gap*i), (self.offset+ self.width, self.gap*i), thickness)
+            pygame.draw.line(win, color, (self.offset + self.gap*i, 0), (self.offset + self.gap*i, self.height), thickness)
+
+
+        # Numbers
+
+        for line in self.cubes:
+            for cube in line:
+                cube.draw(win, fonts, self)
+
+
+
+        # NOTES
+        def drawNotes(message):
+            text = fonts.footer_font.render("Notes: ", 1, BLACK)
+            win.blit(text, (15, fonts.footer_ypos))
+
+            left = 17 + text.get_width()
+            top = self.height + (HEIGHT-(self.height))/5
+            pos = (left, top)
+            color = GREY
+
+            if message == "ON":
+                color = BLUE
+
+            text = fonts.footer_font.render(message, 1, WHITE)
+            rect_width, rect_height = text.get_width() + 20, ((HEIGHT-(self.height))*3)/5 - 2
+            pygame.draw.rect(win, color, pygame.Rect(pos,(rect_width, rect_height)))
+            win.blit(text, (10 + left, fonts.footer_ypos))
+
+        if self.notes:
+            drawNotes("ON")
+        else:
+            drawNotes("OFF")
+
+
+        # Time
+        time = formatTime(play_time)
+        text = fonts.footer_font.render("Time: " + time, 1, BLACK)
+        win.blit(text, (WIDTH-text.get_width()-15,fonts.footer_ypos))
 
         pygame.display.update()
 
@@ -90,26 +138,29 @@ class Grid:
 class Cube:
     def __init__(self,value,row,col):
         self.value = value
+        self.temp = 0
         self.pencil = [0,0,0,0,0,0,0,0,0]
         self.selected = False
         self.row = row
         self.col = col
 
+    def draw(self, win, fonts, grid):
 
-# Draw Time, Mistakes and Notes on and oFF
-def drawLeftovers(win, fonts, play_time):
-    time = formatTime(play_time)
+        if self.temp !=0 or self.value:
+            if self.value != 0:
+                text = fonts.cube_font.render(str(self.value), 1, BLACK)
+            else:
+                text = fonts.cube_font.render(str(self.temp), 1, RED)
+            x = grid.gap*self.row + (grid.gap - text.get_width())/2
+            y = grid.gap*self.col + (grid.gap - text.get_height())/2
+            win.blit(text, (x,y))
 
-    # Time
-    text = fonts.footer_font.render("Time: " + time, 1, BLACK)
-    win.blit(text, (WIDTH-text.get_width()-15,fonts.footer_ypos))
-    pygame.display.update()
 
 
 def formatTime(secs):
-    sec = int(secs)%60
-    minute = int((secs//60)%60)
-    hour = int(secs//(60*60))
+    sec = (int(secs))%60
+    minute = int(secs//60)%60
+    hour = minute//60
 
     time  = " " + str(minute) + ":" +  str(sec)
     return time
@@ -131,10 +182,10 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
-        board.draw(win)
-        drawLeftovers(win, fonts, play_time)
+        board.draw(win, fonts, play_time)
 
-    return start
+
+
 
 
 
