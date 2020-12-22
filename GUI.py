@@ -8,6 +8,7 @@ WHITE = (255,255,255)
 BLACK = (0,0,0)
 GREY = (112, 127, 128)
 RED = (255,0,0)
+LIGHT_BLUE = (187, 222, 251)
 BLUE = (74,144,226)
 WIDTH, HEIGHT = 542, 600
 
@@ -64,10 +65,10 @@ class Grid:
     def __init__(self, width, height, offset):
         self.height = height
         self.width = width
-        self.cubes = [[Cube(self.board[i][j],j,i) for j in range(9)] for i in range(9)]
         self.offset = offset
-        self.notes = False
         self.gap = (self.height - 2*self.offset)/ 9
+        self.cubes = [[Cube(self.board[i][j],j,i,self.gap,self.offset) for j in range(9)] for i in range(9)]
+        self.notes = False
 
     def updateModel(self):
         self.model = [[cube.value for cube in line] for line in self.cubes]
@@ -85,38 +86,35 @@ class Grid:
             pygame.draw.line(win, color, (self.offset + 0, self.gap*i), (self.offset+ self.width, self.gap*i), thickness)
             pygame.draw.line(win, color, (self.offset + self.gap*i, 0), (self.offset + self.gap*i, self.height), thickness)
 
-
         # Numbers
-
         for line in self.cubes:
             for cube in line:
                 cube.draw(win, fonts, self)
 
-
-
         # NOTES
         def drawNotes(message):
-            text = fonts.footer_font.render("Notes: ", 1, BLACK)
-            win.blit(text, (15, fonts.footer_ypos))
+            text1 = fonts.footer_font.render("Notes: ", 1, BLACK)
+            win.blit(text1, (15, fonts.footer_ypos))
 
-            left = 17 + text.get_width()
-            top = self.height + (HEIGHT-(self.height))/5
-            pos = (left, top)
             color = GREY
-
             if message == "ON":
                 color = BLUE
+            text2 = fonts.footer_font.render(message, 1, WHITE)
 
-            text = fonts.footer_font.render(message, 1, WHITE)
-            rect_width, rect_height = text.get_width() + 20, ((HEIGHT-(self.height))*3)/5 - 2
-            pygame.draw.rect(win, color, pygame.Rect(pos,(rect_width, rect_height)))
-            win.blit(text, (10 + left, fonts.footer_ypos))
+            # Coordinates of the rectangle
+            left = 17 + text1.get_width()
+            top = self.height + (HEIGHT-(self.height))/5
+            rect_width =  text2.get_width() + 20
+            rect_height = ((HEIGHT-(self.height))*3)/5 - 2
+
+            self.rect = (left, top, rect_width, rect_height)
+            pygame.draw.rect(win, color, pygame.Rect(self.rect))
+            win.blit(text2, (10 + left, fonts.footer_ypos))
 
         if self.notes:
             drawNotes("ON")
         else:
             drawNotes("OFF")
-
 
         # Time
         time = formatTime(play_time)
@@ -127,6 +125,23 @@ class Grid:
 
 
 
+    def click(self, pos):
+        # clcked on a sudoku cell
+        if self.offset<pos[0] and pos[0]<(self.width + self.offset) and pos[1]<self.height:
+            col_no = int((pos[0] - self.offset)//self.gap)
+            row_no = int(pos[1]//self.gap)
+            print(row_no,col_no)
+            for line in self.cubes:
+                for cube in line:
+                    cube.selected = False
+            self.cubes[row_no][col_no].setSelected()
+            return (row_no,col_no)
+
+         # Clicked on notes
+        if self.rect[0]<pos[0] and self.rect[1]<pos[1] and pos[0]<self.rect[0]+self.rect[2] and pos[1]<self.rect[1]+self.rect[3]:
+            self.notes = ~(self.notes)
+
+        return None
 
 
 # Data
@@ -136,24 +151,49 @@ class Grid:
 # draw(draws a cube and highlights if selected), Set pencil value, set actual value
 
 class Cube:
-    def __init__(self,value,row,col):
+    def __init__(self, value, row, col, gap, offset):
         self.value = value
         self.temp = 0
         self.pencil = [0,0,0,0,0,0,0,0,0]
         self.selected = False
         self.row = row
         self.col = col
+        self.gap = gap
+        self.offset = offset
+        self.col_pos = self.offset + self.col*self.gap
+        self.row_pos = self.row*self.gap
 
-    def draw(self, win, fonts, grid):
+        row_thickness = 1
+        col_thickness = 1
+        if self.row%3 == 0:
+            row_thickness = 3
+        if self.col%3 == 0:
+            col_thickness = 3
 
-        if self.temp !=0 or self.value:
+        self.rect = (self.row_pos + row_thickness,self.col_pos+col_thickness, self.gap-row_thickness,self.gap-col_thickness)
+
+    def setSelected(self):
+        if self.value!=0:
+            self.selected = False
+        else:
+            self.selected = True
+
+    def draw(self, win, fonts, board):
+
+        # If the cell is selected
+        if self.selected:
+            pygame.draw.rect(win, LIGHT_BLUE, pygame.Rect(self.rect))
+
+        # MAIN TEXT
+        if self.temp !=0 or self.value!=0:
             if self.value != 0:
                 text = fonts.cube_font.render(str(self.value), 1, BLACK)
             else:
                 text = fonts.cube_font.render(str(self.temp), 1, RED)
-            x = grid.gap*self.row + (grid.gap - text.get_width())/2
-            y = grid.gap*self.col + (grid.gap - text.get_height())/2
-            win.blit(text, (x,y))
+            x_font = self.row_pos + (self.gap - text.get_width())/2
+            y_font = self.col_pos + (self.gap - text.get_height())/2
+            win.blit(text, (x_font,y_font))
+
 
 
 
@@ -161,7 +201,6 @@ def formatTime(secs):
     sec = (int(secs))%60
     minute = int(secs//60)%60
     hour = minute//60
-
     time  = " " + str(minute) + ":" +  str(sec)
     return time
 
@@ -181,6 +220,10 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                clicked = board.click(pos)
 
         board.draw(win, fonts, play_time)
 
