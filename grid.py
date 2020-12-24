@@ -6,8 +6,8 @@ from cube import Cube
 import pygame
 
 
-
 class Grid:
+    # The board to be solved, mutliple boards can be added and random function can be used to choose one
 
     board = [[9,8,0,6,0,0,0,3,1],
              [0,0,7,0,0,0,0,0,0],
@@ -18,16 +18,6 @@ class Grid:
              [0,3,2,0,0,7,4,0,0],
              [0,4,0,3,0,0,0,1,0],
              [0,0,0,0,0,0,0,0,0]]
-
-            # [9, 8, 4, 6, 7, 2, 5, 3, 1]
-            # [2, 5, 7, 8, 3, 1, 6, 4, 9]
-            # [6, 1, 3, 5, 4, 9, 8, 2, 7]
-            # [5, 6, 1, 9, 2, 8, 3, 7, 4]
-            # [4, 2, 9, 7, 6, 3, 1, 8, 5]
-            # [3, 7, 8, 4, 1, 5, 9, 6, 2]
-            # [8, 3, 2, 1, 5, 7, 4, 9, 6]
-            # [7, 4, 5, 3, 9, 6, 2, 1, 8]
-            # [1, 9, 6, 2, 8, 4, 7, 5, 3]
 
 
     def __init__(self, width, height):
@@ -86,7 +76,6 @@ class Grid:
         else:
             drawNotes("OFF")
 
-
         # Time
         time = formatTime(play_time)
         text = fonts.footer_font.render("Time: " + time, 1, colors.BLACK)
@@ -108,25 +97,26 @@ class Grid:
             col_no = int(pos[0]//self.gap)
             row_no = int(pos[1]//self.gap)
 
-            # if the cube can be selected
+        # if the cube can be selected
             if  ~self.cubes[row_no][col_no].is_correct or self.cubes[row_no][col_no].value!=0:
                 self.clearCubesSelection()
                 self.cubes[row_no][col_no].setSelected()
                 self.selected_cube = (row_no, col_no)
 
-        # Clicked on notes
+        # if Clicked on notes
         elif self.rect[0]<pos[0] and self.rect[1]<pos[1] and pos[0]<self.rect[0]+self.rect[2] and pos[1]<self.rect[1]+self.rect[3]:
             self.notes = ~(self.notes)
 
-        # Clicked elsewhere
+        # if Clicked elsewhere
         else:
             self.clearCubesSelection()
 
 
-    # Place the clicked key
+    # Place the clicked key in the selected location
     def place(self, key):
         if key is not None and self.selected_cube is not None :
             row, col = self.selected_cube
+
             # If notes is off
             if not self.notes:
                 self.cubes[row][col].value = key
@@ -139,20 +129,24 @@ class Grid:
                 else:
                     self.cubes[row][col].is_correct = False
                 self.updateModel()
-            # Notes are off
+
+            # Notes are off (toggle pencil's value)
             else:
                 self.cubes[row][col].pencil[int((key-1)//3)][int((key-1)%3)] = ~self.cubes[row][col].pencil[int((key-1)//3)][int((key-1)%3)]
 
+    # Delete the desired incorrect entery
     def delete(self):
+
         if self.selected_cube is not None:
             row, col = self.selected_cube
-            self.cubes[row][col].is_green = False 
+            self.cubes[row][col].is_green = False
+            # Can delete only if the entry is incorrect
             if self.cubes[row][col].is_correct is False:
                 self.cubes[row][col].value = 0
                 self.cubes[row][col].is_correct = True
 
 
-
+    # Finds out wheter the game is over or not
     def isFinished(self):
         is_finished = True
         for line in self.model:
@@ -161,7 +155,7 @@ class Grid:
                     is_finished = False
         return is_finished
 
-
+#
 def formatTime(secs):
     sec = (int(secs))%60
     minute = int(secs//60)%60

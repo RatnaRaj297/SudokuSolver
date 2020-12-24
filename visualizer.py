@@ -7,11 +7,13 @@ def visualize(board, win, fonts, play_time, clock):
 
     def solveSudoku(board):
         clock.tick(fps)
+        # Finds the first unassigned cell
         find = Solver.findUnassigned(board.model)
         if not find:
             return True
         else:
             row, col = find
+
         # Select to Show Selection
         board.clearCubesSelection()
         board.cubes[row][col].setSelected()
@@ -21,6 +23,7 @@ def visualize(board, win, fonts, play_time, clock):
         for num in range(1,10):
             selected_cube = (row,col)
             if Solver.isSafe(board.model, row, col, num):
+                # if its a safe cell, then input the number and turn it green
                 board.cubes[row][col].value = num
                 board.cubes[row][col].is_green = True
                 board.cubes[row][col].is_correct = True
@@ -32,7 +35,7 @@ def visualize(board, win, fonts, play_time, clock):
                 if solveSudoku(board):
                     return True
 
-                # Failure!
+                # Failure, backtrack!!
                 board.cubes[row][col].is_correct = False
                 board.updateModel()
                 board.draw(win,fonts,play_time)

@@ -23,9 +23,11 @@ class Cube:
         if self.col%3 == 0:
             x_thickness = 3
 
+        # The rectangle object specifying the location for each individual cube
         self.rect = (self.x_pos + x_thickness, self.y_pos + y_thickness, self.gap-x_thickness,self.gap-y_thickness)
 
 
+    # Selects the cell only if the true value has not been input yet
     def setSelected(self):
         if self.value!=0 and self.is_correct:
             self.selected = False
@@ -33,11 +35,13 @@ class Cube:
             self.selected = True
 
 
+    # Draw the cell details
     def draw(self, win, fonts):
-        # If the value in the cell is wrong
+        # To distuinguish correct input cells from the intitial cells and also helps in visualization algorithm
         if self.is_green:
             pygame.draw.rect(win, colors.GREEN, pygame.Rect(self.rect))
 
+        # If the value in the cell is wrong
         if self.is_correct is False:
             pygame.draw.rect(win, colors.LIGHT_RED, pygame.Rect(self.rect))
 

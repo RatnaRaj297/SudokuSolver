@@ -16,6 +16,7 @@ FPS = 60
 clock = pygame.time.Clock()
 
 
+
 def main():
     start = time.time()
     board = Grid(Meta.board_height,Meta.board_width)
@@ -32,10 +33,12 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
+            # If the mouse was clicked somewhere on board
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 board.click(pos)
 
+             # A key was pressed
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
                     key = 1
@@ -62,9 +65,11 @@ def main():
                     print("Game Over")
                     run = False
 
+                # Delete the incorrect selected entry
                 if event.key == pygame.K_DELETE:
                     board.delete()
 
+                #  Visualize Backtracking algorithm
                 if event.key == pygame.K_SPACE:
                     visualize(board, win, fonts, play_time, clock)
                     run = False

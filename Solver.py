@@ -59,18 +59,18 @@ def solveSudoku(board):
     return False
 
 
-board = [[9,8,0,6,0,0,0,3,1],
-         [0,0,7,0,0,0,0,0,0],
-         [6,0,0,5,4,0,0,0,0],
-         [0,0,0,0,0,8,3,7,4],
-         [0,0,0,0,6,0,0,0,0],
-         [0,0,0,0,0,0,9,0,2],
-         [0,3,2,0,0,7,4,0,0],
-         [0,4,0,3,0,0,0,1,0],
-         [0,0,0,0,0,0,0,0,0]]
-
-solved_board = [[int(x) for x in line] for line in board]
-solveSudoku(solved_board)
-
-for line in solved_board:
-    print(line)
+# board = [[9,8,0,6,0,0,0,3,1],
+#          [0,0,7,0,0,0,0,0,0],
+#          [6,0,0,5,4,0,0,0,0],
+#          [0,0,0,0,0,8,3,7,4],
+#          [0,0,0,0,6,0,0,0,0],
+#          [0,0,0,0,0,0,9,0,2],
+#          [0,3,2,0,0,7,4,0,0],
+#          [0,4,0,3,0,0,0,1,0],
+#          [0,0,0,0,0,0,0,0,0]]
+#
+# solved_board = [[int(x) for x in line] for line in board]
+# solveSudoku(solved_board)
+#
+# for line in solved_board:
+#     print(line)
