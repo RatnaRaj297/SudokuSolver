@@ -43,10 +43,6 @@ def solveSudoku(board):
     else:
         row,col = find
 
-    # The entire sudoku is filled
-    if row==-1 and col==-1:
-        return True
-
     # Check for every number
     for num in range(1, 10):
         if isSafe(board, row, col, num):
@@ -74,4 +70,7 @@ board = [[9,8,0,6,0,0,0,3,1],
          [0,0,0,0,0,0,0,0,0]]
 
 solved_board = [[int(x) for x in line] for line in board]
-# print(solved_board)
+solveSudoku(solved_board)
+
+for line in solved_board:
+    print(line)
